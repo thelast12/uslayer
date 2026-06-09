@@ -1891,6 +1891,68 @@ document.getElementById('ctaCloseBtn').addEventListener('click', function() {
 setTimeout(() => { if (!ctaDismissed) stickyCta.classList.add('visible'); }, 300);
 
 function submitForm() {
+ // --- შენი ფორმის ნაბიჯების მართვის და GOOGLE SHEETS-ის გაერთიანებული კოდი ---
+
+let currentStep = 1;
+
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  currentStep = 1;
+  showStep(currentStep);
+  
+  // ფორმის თავიდან გახსნისას ვიზუალის განულება
+  document.getElementById('modalFormBody').style.display = 'block';
+  document.getElementById('modalSuccess').classList.remove('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeModal();
+});
+
+function selectCase(btn) {
+  document.querySelectorAll('.case-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function selectUrgency(btn) {
+  document.querySelectorAll('.urg-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function showStep(step) {
+  document.querySelectorAll('.modal-step').forEach(s => s.classList.remove('active'));
+  document.getElementById(`step${step}`).classList.add('active');
+  
+  // პროგრესის ზოლის განახლება
+  const progress = (step / 3) * 100;
+  document.getElementById('modalProgress').style.width = `${progress}%`;
+}
+
+function nextStep() {
+  if (currentStep < 3) {
+    currentStep++;
+    showStep(currentStep);
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    currentStep--;
+    showStep(currentStep);
+  }
+}
+
+function submitForm() {
   // 1. ველების მნიშვნელობების აღება ID-ების მიხედვით
   const name = document.getElementById('mName').value.trim();
   const phone = document.getElementById('mPhone').value.trim();
@@ -1922,7 +1984,7 @@ function submitForm() {
   // შენი Google Web App URL
   const webAppUrl = 'https://script.google.com/macros/s/AKfycbw3nmcvE_yFq8CYJ5r8gk0smHB8mKfqna7aSuqdssv7Li_qj3yU6-lqXVBxPiOVhps/exec';
 
-  // 4. მონაცემების გაგზავნა ფონურ რეჟიმში Google Sheet-ში
+  // 4. მონაცემების გაგზავნა Google Sheet-ში
   fetch(webAppUrl, {
     method: 'POST',
     mode: 'no-cors',
@@ -1962,55 +2024,8 @@ window.addEventListener('scroll', function() {
   }
 });
 
-// Show immediately on page load
+// გვერდის ჩატვირთვისას Sticky CTA-ს გამოჩენა
 setTimeout(() => { if (!ctaDismissed) stickyCta.classList.add('visible'); }, 300);
-
-</script>
-</body>
-</html>
-  // ვალიდაცია (ეს შენს კოდშიც გეწერა)
-  if (!name || (!phone && !email)) {
-    alert('Please enter your name and at least one contact method (phone or email).');
-    return;
-  }
-
-  // 2. არჩეული ავარიის ტიპის და დროის ტექსტის აღება საიტიდან
-  const selectedCaseBtn = document.querySelector('.case-type-btn.selected');
-  const selectedUrgencyBtn = document.querySelector('.urg-btn.selected');
-  
-  const accidentType = selectedCaseBtn ? selectedCaseBtn.innerText.replace(/[^\w\s-]/g, '').trim() : '';
-  const accidentTime = selectedUrgencyBtn ? selectedUrgencyBtn.innerText.replace(/[^\w\s-]/g, '').trim() : '';
-
-  // 3. მონაცემების შეკვრა (Object)
-  const formData = new FormData();
-  formData.append('name', name);
-  formData.append('phone', phone);
-  formData.append('email', email);
-  formData.append('accident_type', accidentType);
-  formData.append('accident_time', accidentTime);
-  formData.append('state', ''); // თუ საიტზე შტატის ველი არ გაქვს, ცარიელი გაიგზავნება
-  formData.append('description', ''); // თუ აღწერის ველი არ გაქვს, ცარიელი გაიგზავნება
-
-  // შენი Google Web App URL
-  const webAppUrl = 'https://script.google.com/macros/s/AKfycbw3nmcvE_yFq8CYJ5r8gk0smHB8mKfqna7aSuqdssv7Li_qj3yU6-lqXVBxPiOVhps/exec';
-
-  // 4. მონაცემების გაგზავნა ფონურ რეჟიმში
-  fetch(webAppUrl, {
-    method: 'POST',
-    mode: 'no-cors',
-    body: formData
-  })
-  .then(() => {
-    console.log('Successfully sent to Google Sheets!');
-  })
-  .catch(error => {
-    console.error('Error sending data:', error);
-  });
-
-  // წარმატების ანიმაციის ჩვენება საიტზე (შენი ორიგინალი კოდი)
-  document.getElementById('modalFormBody').style.display = 'none';
-  document.getElementById('modalSuccess').classList.add('show');
-}  
 
 </script>
 </body>
