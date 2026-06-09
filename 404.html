@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script>
+// GitHub Pages SPA redirect trick
+// /documents-checklist → index.html?p=/documents-checklist → index.html handles it
+var path = window.location.pathname;
+var validSlugs = ['step-by-step-guide','who-to-call','documents-checklist','your-legal-rights','common-mistakes','truck-accidents','faq'];
+var slug = path.replace(/^\//, '').replace(/\/$/, '');
+if (validSlugs.indexOf(slug) !== -1) {
+  // Redirect to the actual HTML file
+  window.location.replace('/' + slug + '.html');
+} else {
+  window.location.replace('/');
+}
+</script>
+</head>
+<body></body>
+</html>
