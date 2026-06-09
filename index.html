@@ -1890,13 +1890,84 @@ document.getElementById('ctaCloseBtn').addEventListener('click', function() {
 // Show immediately on page load
 setTimeout(() => { if (!ctaDismissed) stickyCta.classList.add('visible'); }, 300);
 
-// --- Google Sheets-ში მონაცემების გაგზავნის განახლებული კოდი ---
 function submitForm() {
   // 1. ველების მნიშვნელობების აღება ID-ების მიხედვით
   const name = document.getElementById('mName').value.trim();
   const phone = document.getElementById('mPhone').value.trim();
   const email = document.getElementById('mEmail').value.trim();
   
+  // ვალიდაცია
+  if (!name || (!phone && !email)) {
+    alert('Please enter your name and at least one contact method (phone or email).');
+    return;
+  }
+
+  // 2. არჩეული ავარიის ტიპის და დროის ტექსტის აღება საიტიდან
+  const selectedCaseBtn = document.querySelector('.case-type-btn.selected');
+  const selectedUrgencyBtn = document.querySelector('.urg-btn.selected');
+  
+  const accidentType = selectedCaseBtn ? selectedCaseBtn.innerText.replace(/[^\w\s-]/g, '').trim() : '';
+  const accidentTime = selectedUrgencyBtn ? selectedUrgencyBtn.innerText.replace(/[^\w\s-]/g, '').trim() : '';
+
+  // 3. მონაცემების შეკვრა (Object)
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('phone', phone);
+  formData.append('email', email);
+  formData.append('accident_type', accidentType);
+  formData.append('accident_time', accidentTime);
+  formData.append('state', ''); 
+  formData.append('description', ''); 
+
+  // შენი Google Web App URL
+  const webAppUrl = 'https://script.google.com/macros/s/AKfycbw3nmcvE_yFq8CYJ5r8gk0smHB8mKfqna7aSuqdssv7Li_qj3yU6-lqXVBxPiOVhps/exec';
+
+  // 4. მონაცემების გაგზავნა ფონურ რეჟიმში Google Sheet-ში
+  fetch(webAppUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    body: formData
+  })
+  .then(() => {
+    console.log('Successfully sent to Google Sheets!');
+  })
+  .catch(error => {
+    console.error('Error sending data:', error);
+  });
+
+  // წარმატების ანიმაციის ჩვენება საიტზე
+  document.getElementById('modalFormBody').style.display = 'none';
+  document.getElementById('modalSuccess').classList.add('show');
+}
+
+// ─── STICKY CTA ───
+const stickyCta = document.getElementById('stickyCta');
+let ctaDismissed = false;
+let ctaShown = false;
+
+document.getElementById('ctaCloseBtn').addEventListener('click', function() {
+  ctaDismissed = true;
+  stickyCta.style.transform = 'translateY(100%)';
+});
+
+window.addEventListener('scroll', function() {
+  if (ctaDismissed) return;
+  const triggerOffset = document.documentElement.scrollHeight * 0.2;
+  if (window.scrollY > triggerOffset && !ctaShown) {
+    stickyCta.classList.add('visible');
+    ctaShown = true;
+  } else if (window.scrollY <= triggerOffset && ctaShown) {
+    stickyCta.classList.remove('visible');
+    ctaShown = false;
+  }
+});
+
+// Show immediately on page load
+setTimeout(() => { if (!ctaDismissed) stickyCta.classList.add('visible'); }, 300);
+
+</script>
+</body>
+</html>
   // ვალიდაცია (ეს შენს კოდშიც გეწერა)
   if (!name || (!phone && !email)) {
     alert('Please enter your name and at least one contact method (phone or email).');
